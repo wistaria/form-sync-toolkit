@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Form Sync Toolkit CLI for exporting Google Forms to YAML."""
+
 import argparse
 from pathlib import Path
 
@@ -26,7 +28,7 @@ def get_credentials():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Export a Google Form to YAML configuration."
+        description="Form Sync Toolkit: export a Google Form to YAML."
     )
     parser.add_argument("--form-id", required=True, help="Target Google Form ID.")
     parser.add_argument(

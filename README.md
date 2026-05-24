@@ -1,4 +1,4 @@
-# Google Form Generator
+# Form Sync Toolkit
 
 [![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Google Forms API](https://img.shields.io/badge/Google%20Forms-API-673AB7?logo=googleforms&logoColor=white)](https://developers.google.com/forms/api)
@@ -6,9 +6,9 @@
 [![YAML](https://img.shields.io/badge/Config-YAML-000000?logo=yaml&logoColor=white)](yaml.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-YAML から Google Form を作成・更新、一覧表示や YAML 書き出しもできる CLI ツール
+YAML から Google Forms を作成・更新、一覧表示や YAML 書き出しもできる CLI ツール
 
-作者: Synge Todo <wistaria@phys.s.u-tokyo.ac.jp>
+作者: 藤堂眞治 / Synge Todo
 
 ## 準備: 認証情報の設定
 
@@ -50,7 +50,7 @@ rm -f token.json
 - `export_form.py`
   - 指定した Form ID から YAML を生成する
 - `check_form.py`
-  - 指定した Form ID の Google Form と YAML を比較する
+  - 指定した Form ID の Google Forms と YAML を比較する
   - 質問数、タイトル、種類、オプションなどの差分を確認する
 
 ## License

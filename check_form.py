@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Form Sync Toolkit CLI for comparing Google Forms against YAML."""
+
 import argparse
 import difflib
 
@@ -77,7 +79,7 @@ def check_form_against_yaml(forms_service, drive_service, form_id, yaml_config):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Check whether a Google Form matches a YAML definition."
+        description="Form Sync Toolkit: compare a Google Form against YAML."
     )
     parser.add_argument("yaml_file", help="Path to form definition YAML file.")
     parser.add_argument("--form-id", required=True, help="Target Google Form ID.")

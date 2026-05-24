@@ -1,6 +1,6 @@
 # YAML Format Manual
 
-このドキュメントは、`sync_form.py` で利用する YAML の入力形式を説明します。
+このドキュメントは、Form Sync Toolkit の `sync_form.py` で利用する YAML の入力形式を説明します。
 
 ## 概要
 

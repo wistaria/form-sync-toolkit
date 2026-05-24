@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Form Sync Toolkit CLI for listing Google Forms in Drive."""
+
 import argparse
 
 from googleapiclient.discovery import build

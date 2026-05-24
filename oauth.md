@@ -17,7 +17,7 @@
    2. ブランディング
    3. 開始
    4. 入力例：
-      - アプリ名: Google Forms CLI
+      - アプリ名: Form Sync Toolkit
       - ユーザサポートメール: 自分の Gmail
       - 対象: 外部
       - 連絡先情報: 自分の Gmail
@@ -34,6 +34,6 @@
    2. 認証情報を作成 > OAuth Client ID
    3. 入力例：
       - クライアントの種類: デスクトップアプリ
-      - 名前: Google Forms CLI
+      - 名前: Form Sync Toolkit
    4. JSONをダウンロード
    5. 保存

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Form Sync Toolkit CLI for creating and updating Google Forms from YAML."""
+
 import argparse
 
 from googleapiclient.discovery import build
@@ -121,7 +123,7 @@ def sync_form(service, drive_service, config):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Create a Google Form from a YAML definition."
+        description="Form Sync Toolkit: create or update a Google Form from YAML."
     )
     parser.add_argument("yaml_file", help="Path to form definition YAML file.")
 
