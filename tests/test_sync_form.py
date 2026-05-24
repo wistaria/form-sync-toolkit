@@ -109,6 +109,27 @@ def test_make_question_item_short_with_description():
     }
 
 
+def test_make_question_item_paragraph_with_description():
+    item = create_form.make_question_item(
+        {
+            "type": "paragraph",
+            "title": "Comment",
+            "description": "例）改善案を記入してください",
+        }
+    )
+
+    assert item == {
+        "title": "Comment",
+        "description": "例）改善案を記入してください",
+        "questionItem": {
+            "question": {
+                "required": False,
+                "textQuestion": {"paragraph": True},
+            }
+        },
+    }
+
+
 def test_create_form_builds_expected_requests():
     forms_service = _FormsServiceStub()
     config = {
