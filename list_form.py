@@ -51,11 +51,48 @@ def list_forms(service, limit=100):
     response = service.files().list(
         q=query,
         pageSize=limit,
-        fields="files(id,name,createdTime,modifiedTime)",
+        fields="files(id,name,createdTime,modifiedTime,parents)",
         orderBy="modifiedTime desc",
     ).execute()
 
     return response.get("files", [])
+
+
+def get_folder_path(service, folder_id, cache):
+    if folder_id == "root":
+        return "/"
+
+    if folder_id in cache:
+        return cache[folder_id]
+
+    folder = service.files().get(
+        fileId=folder_id,
+        fields="id,name,parents",
+    ).execute()
+
+    parent_ids = folder.get("parents", [])
+    if not parent_ids:
+        folder_path = f"/{folder['name']}"
+    else:
+        parent_path = get_folder_path(service, parent_ids[0], cache)
+        if parent_path == "/":
+            folder_path = f"/{folder['name']}"
+        else:
+            folder_path = f"{parent_path}/{folder['name']}"
+
+    cache[folder_id] = folder_path
+    return folder_path
+
+
+def get_form_path(service, form, cache):
+    parent_ids = form.get("parents", [])
+    if not parent_ids:
+        return f"/{form['name']}"
+
+    folder_path = get_folder_path(service, parent_ids[0], cache)
+    if folder_path == "/":
+        return f"/{form['name']}"
+    return f"{folder_path}/{form['name']}"
 
 
 def main():
@@ -82,12 +119,14 @@ def main():
         drive_service,
         limit=args.limit,
     )
+    folder_path_cache = {}
 
     for form in forms:
         form_id = form["id"]
 
         print("=" * 80)
         print(f"Name: {form['name']}")
+        print(f"Path: {get_form_path(drive_service, form, folder_path_cache)}")
         print(f"ID: {form_id}")
         print(f"Modified: {form['modifiedTime']}")
         print(

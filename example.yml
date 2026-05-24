@@ -1,5 +1,6 @@
 title: アンケート
 description: 今後の業務改善の参考にするためのアンケートです
+path: /Forms/業務アンケート
 
 questions:
   - title: 年齢を教えてください
