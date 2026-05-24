@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
+import os
 from pathlib import Path
 
 import yaml
@@ -13,8 +15,8 @@ from googleapiclient.discovery import build
 SCOPES = ["https://www.googleapis.com/auth/forms.body"]
 
 
-def get_service(credentials_path: str, token_path: str):
-    token_path = Path(token_path)
+def get_credentials():
+    token_path = Path("token.json")
     creds = None
 
     if token_path.exists():
@@ -24,23 +26,25 @@ def get_service(credentials_path: str, token_path: str):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_path,
+            credentials_json = os.environ["GOOGLE_CREDENTIALS_JSON"]
+            client_config = json.loads(credentials_json)
+            flow = InstalledAppFlow.from_client_config(
+                client_config,
                 SCOPES,
             )
             creds = flow.run_local_server(port=0)
 
         token_path.write_text(creds.to_json())
 
-    return build("forms", "v1", credentials=creds)
+    return creds
 
 
-def load_yaml(path: str):
+def load_form_yaml(path):
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def make_question_item(q: dict) -> dict:
+def make_question_item(q):
     qtype = q["type"]
 
     question = {"required": bool(q.get("required", False))}
@@ -75,18 +79,15 @@ def make_question_item(q: dict) -> dict:
     else:
         raise ValueError(f"Unsupported question type: {qtype}")
 
-    item = {
-        "title": q["title"],
-        "questionItem": {"question": question},
-    }
+    item = {"title": q["title"], "questionItem": {"question": question}}
 
-    if q.get("description"):
+    if "description" in q:
         item["description"] = q["description"]
 
     return item
 
 
-def update_form(service, form_id: str, config: dict):
+def update_form(service, form_id, config):
     form = service.forms().get(formId=form_id).execute()
 
     requests = []
@@ -96,18 +97,17 @@ def update_form(service, form_id: str, config: dict):
             "updateFormInfo": {
                 "info": {
                     "title": config["title"],
-                    "documentTitle": config.get("documentTitle", config["title"]),
                     "description": config.get("description", ""),
                 },
-                "updateMask": "title,documentTitle,description",
+                "updateMask": "title,description",
             }
         }
     )
 
     # 既存項目を後ろから削除
     items = form.get("items", [])
-    for item in reversed(items):
-        requests.append({"deleteItem": {"location": {"index": item["index"]}}})
+    for index in range(len(items) - 1, -1, -1):
+        requests.append({"deleteItem": {"location": {"index": index}}})
 
     # YAMLから項目を再作成
     for index, q in enumerate(config.get("questions", [])):
@@ -145,26 +145,11 @@ def main():
         help="Target Google Form ID.",
     )
 
-    parser.add_argument(
-        "--credentials",
-        default="credentials.json",
-        help="Path to OAuth client credentials JSON.",
-    )
-
-    parser.add_argument(
-        "--token",
-        default="token.json",
-        help="Path to OAuth token cache.",
-    )
-
     args = parser.parse_args()
 
-    config = load_yaml(args.yaml_file)
-
-    service = get_service(
-        credentials_path=args.credentials,
-        token_path=args.token,
-    )
+    config = load_form_yaml(args.yaml_file)
+    creds = get_credentials()
+    service = build("forms", "v1", credentials=creds)
 
     update_form(
         service=service,
