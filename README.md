@@ -4,11 +4,10 @@
 [![Google Forms API](https://img.shields.io/badge/Google%20Forms-API-673AB7?logo=googleforms&logoColor=white)](https://developers.google.com/forms/api)
 [![Google Drive API](https://img.shields.io/badge/Google%20Drive-API-4285F4?logo=googledrive&logoColor=white)](https://developers.google.com/drive)
 [![YAML](https://img.shields.io/badge/Config-YAML-000000?logo=yaml&logoColor=white)](yaml.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-Synge%20Todo-blue)](https://github.com/wistaria)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 YAML から Google フォームを作成・更新、一覧表示、YAML 書き出しする CLI ツール
-
-作者: 藤堂眞治 / Synge Todo
 
 ## 準備
 
