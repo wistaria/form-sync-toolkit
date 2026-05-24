@@ -1,12 +1,12 @@
 # YAML Format Manual
 
-このドキュメントは、Form Sync Toolkit の `sync_form.py` で利用する YAML の入力形式を説明します。
+`sync_form.py` で使用する YAML 形式を定義します
 
 ## 概要
 
-- `sync_form.py` は YAML の `path` + `title` で既存フォームを検索します。
-- 同名フォームが見つかれば更新、見つからなければ新規作成します。
-- `path` 指定時は、フォルダが存在しない場合に自動作成します。
+- `path` + `title` で既存フォームを検索
+- 1 件なら更新、0 件なら新規作成
+- `path` 指定時はフォルダを自動作成
 
 ## トップレベル項目
 
@@ -23,21 +23,20 @@ questions:
 - `title`:
   - 必須
   - フォームタイトル
-  - upsert 時の検索キーとしても利用
+  - 検索キーとして使用
 - `documentTitle`:
   - 任意
   - 新規作成時のみ反映
-  - 更新時は Google Forms API 制約により変更されません
+  - 更新時は変更されない
 - `description`:
   - 任意
   - フォーム説明
 - `path`:
   - 任意
   - Google Drive 上の配置先フォルダパス
-  - 例: `/Forms/業務アンケート`
-  - 省略時は Drive ルート扱い
+  - 省略時は Drive ルート
 - `questions`:
-  - 任意（省略時は質問なしフォーム）
+  - 任意（省略時は質問なし）
   - 質問オブジェクトの配列
 
 ## 質問オブジェクト
@@ -49,10 +48,10 @@ questions:
   type: short | paragraph | radio | checkbox | dropdown
   required: true | false   # 任意（省略時 false）
   description: 補足説明      # 任意
-  options:                 # type が radio/checkbox/dropdown のとき必須
+  options:                 # radio/checkbox/dropdown で必須
     - 選択肢A
     - 選択肢B
-  shuffle: true | false    # radio/checkbox のみ有効（任意、省略時 false）
+  shuffle: true | false    # radio/checkbox のみ有効
 ```
 
 ### type ごとの要件
@@ -74,11 +73,11 @@ questions:
 - `dropdown`
   - ドロップダウン
   - `options` 必須
-  - `shuffle` は無視されます（常に false 扱い）
+  - `shuffle` は無視される
 
 ## 更新時の挙動
 
-既存フォームが見つかった場合、以下の処理を行います。
+既存フォームが見つかった場合は次を実行します。
 
 1. タイトルと説明を更新
 2. 既存の質問を全削除
@@ -88,9 +87,9 @@ questions:
 ## フォーム特定ルール
 
 - 検索条件: `path` 配下で `title` が一致
-- 該当が 0 件: 新規作成
-- 該当が 1 件: 更新
-- 該当が 2 件以上: 曖昧エラー
+- 0 件: 新規作成
+- 1 件: 更新
+- 2 件以上: 曖昧エラー
 
 ## エラーになりやすいケース
 
@@ -101,7 +100,7 @@ questions:
 
 ## 注意事項
 
-- フォルダパス内に同名フォルダが複数ある場合、曖昧エラーになります。
+- フォルダパス内に同名フォルダが複数ある場合は曖昧エラー
 
 ## 完全サンプル
 
