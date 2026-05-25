@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
+from __future__ import annotations
+
+if __name__ == "__main__":
+    from cli_common import ensure_project_venv
+
+    ensure_project_venv()
 
 """Form Sync Toolkit CLI for listing Google Forms in Drive."""
 

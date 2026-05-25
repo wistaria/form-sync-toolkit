@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
+from __future__ import annotations
+
+if __name__ == "__main__":
+    from cli_common import ensure_project_venv
+
+    ensure_project_venv()
 
 """Form Sync Toolkit CLI for creating and updating Google Forms from YAML."""
 
@@ -13,7 +20,6 @@ from form_common import (
     load_yaml as load_form_yaml,
     make_question_item,
     move_file_to_path,
-    resolve_folder_id_by_path,
 )
 
 

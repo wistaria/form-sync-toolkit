@@ -1,70 +1,115 @@
 # Form Sync Toolkit
 
-[![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python&logoColor=white)](https://www.python.org/)
+[English](README.md) | [日本語](README-ja.md)
+
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![Google Forms API](https://img.shields.io/badge/Google%20Forms-API-673AB7?logo=googleforms&logoColor=white)](https://developers.google.com/forms/api)
 [![Google Drive API](https://img.shields.io/badge/Google%20Drive-API-4285F4?logo=googledrive&logoColor=white)](https://developers.google.com/drive)
-[![YAML](https://img.shields.io/badge/Config-YAML-000000?logo=yaml&logoColor=white)](yaml.md)
-[![Author](https://img.shields.io/badge/Author-Synge%20Todo-blue)](https://github.com/wistaria)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Config](https://img.shields.io/badge/config-YAML-000000?logo=yaml&logoColor=white)](yaml.md)
+[![Author](https://img.shields.io/badge/author-Synge%20Todo-blue)](https://github.com/wistaria)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-YAML から Google フォームを作成・更新、一覧表示、YAML 書き出しする CLI ツール
+A CLI toolkit for creating, updating, exporting, listing, and checking Google Forms from YAML.
 
-## 準備
+## Features
 
-### 仮想環境
+- Create or update a Google Form from a YAML definition
+- Export an existing Google Form to YAML
+- Compare a Google Form with a YAML definition and print a unified diff
+- List Google Forms in Google Drive with full Drive paths
+- Move created forms into a Drive folder path from YAML
 
-- 仮想環境を作成して有効化する
+## Requirements
+
+- Python 3.10+
+- Google OAuth client credentials
+- Network access on first run to install Python runtime dependencies
+
+## Setup
+
+The scripts create a virtual environment in the system temp directory and install runtime dependencies from `requirements.txt` automatically on first run. On macOS, the path is `/private/tmp/$UID/form-sync-toolkit`.
+
+Get OAuth client credentials by following [oauth.md](oauth.md), then set them as an environment variable:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+export GOOGLE_CREDENTIALS_JSON='{"installed":{"client_id":"...","client_secret":"...","redirect_uris":["http://localhost"]}}'
 ```
 
-### 認証情報の設定
-
-- OAuth クライアント ID の取得手順は [oauth.md](oauth.md) を参照
-
-- 環境変数 `GOOGLE_CREDENTIALS_JSON` を設定する
-
-```bash
-export GOOGLE_CREDENTIALS_JSON={"installed":{"client_id": ... ["http://localhost"]}}
-```
-
-- 認証情報を変更した場合は、`token.json` を削除する
+If you change credentials or scopes, remove `token.json` and run a command again:
 
 ```bash
 rm -f token.json
 ```
 
-## 実行
+The first authenticated run opens a browser. Select your Google account, allow access, and continue past the unverified-app warning for your own OAuth app.
 
-- YAML を作成または更新: `python3 sync_form.py FORM.yaml`
-- Form ID から YAML を生成: `python3 export_form.py --form-id <FORM_ID>`
-- Form ID と YAML を比較: `python3 check_form.py --form-id <FORM_ID> FORM.yaml`
-- Google Drive 上のフォーム一覧を表示: `python3 list_form.py`
+## Usage
 
-- YAML 形式の詳細は [yaml.md](yaml.md) を参照
+Create or update a form from YAML:
 
-- 初回実行時、または `token.json` 削除後はブラウザが起動する
-  - Google アカウントを選択してアクセスを許可する
-  - 同意画面の「このアプリは Google で確認されていません」は無視して続行する
+```bash
+python3 sync_form.py FORM.yaml
+```
 
-## スクリプトの挙動
+Export a form to YAML:
+
+```bash
+python3 export_form.py --form-id FORM_ID
+```
+
+Write the exported YAML to a specific file:
+
+```bash
+python3 export_form.py --form-id FORM_ID --output FORM.yaml
+```
+
+Compare a form with YAML:
+
+```bash
+python3 check_form.py --form-id FORM_ID FORM.yaml
+```
+
+List Google Forms in Drive:
+
+```bash
+python3 list_form.py
+```
+
+See [yaml.md](yaml.md) for the YAML format.
+
+## Script Behavior
 
 - `sync_form.py`
-  - `path` + `title` で既存フォームを検索
-  - 0 件なら作成、1 件なら更新、2 件以上なら曖昧エラー
-- `list_form.py`
-  - フォーム名と Drive 上のフルパスを表示
+  - Finds an existing form by `path` and `title`
+  - Creates the form when no match exists
+  - Updates the form when exactly one match exists
+  - Fails when multiple matches make the target ambiguous
 - `export_form.py`
-  - Form ID から YAML を生成
+  - Reads a Google Form by Form ID and writes normalized YAML
 - `check_form.py`
-  - Form ID の Google フォームと YAML を比較
-  - 質問数、タイトル、種類、オプションの差分を確認
+  - Compares normalized YAML with the live Google Form
+  - Checks titles, descriptions, paths, question types, options, and required flags
+- `list_form.py`
+  - Prints form names, IDs, timestamps, URLs, and full Drive paths
+
+## Notes
+
+- `requirements.txt` contains runtime dependencies installed by the scripts.
+- `requirements-dev.txt` contains development tools such as `pytest` and `ruff`.
+- Set `FORM_SYNC_TOOLKIT_NO_AUTO_VENV=1` to skip automatic virtual environment setup.
+- OAuth tokens are stored in `token.json` in the current working directory.
+
+## Development
+
+For local development, create your own environment and install both runtime and development dependencies:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r requirements-dev.txt
+pytest
+```
 
 ## License
 
-This project is licensed under the MIT License.
-
-See [LICENSE](LICENSE) for the full text.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.

@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
+from __future__ import annotations
+
+if __name__ == "__main__":
+    from cli_common import ensure_project_venv
+
+    ensure_project_venv()
 
 """Form Sync Toolkit CLI for exporting Google Forms to YAML."""
 
@@ -16,6 +23,15 @@ from form_common import (
     normalize_export_path,
     question_to_yaml_item,
 )
+
+
+__all__ = [
+    "dump_yaml_config",
+    "export_form_yaml",
+    "form_to_yaml_config",
+    "normalize_export_path",
+    "question_to_yaml_item",
+]
 
 
 class _PrettyYamlDumper:  # re-exported via dump_yaml_config in form_common
