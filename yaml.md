@@ -1,128 +1,130 @@
 # YAML Format Manual
 
-`sync_form.py` で使用する YAML 形式を定義します
+[English](yaml.md) | [日本語](yaml-ja.md)
 
-## 概要
+This document defines the YAML format used by `sync_form.py`.
 
-- `path` + `title` で既存フォームを検索
-- 1 件なら更新、0 件なら新規作成
-- `path` 指定時はフォルダを自動作成
+## Overview
 
-## トップレベル項目
+- Finds an existing form by `path` + `title`
+- Updates the form when exactly one match exists, or creates a new form when no match exists
+- Automatically creates folders when `path` is specified
+
+## Top-Level Fields
 
 ```yaml
-title: フォームタイトル
-documentTitle: Drive上のドキュメント名（任意）
-description: フォーム説明（任意）
-path: /Forms/業務アンケート（任意）
+title: Form title
+documentTitle: Document name on Drive (optional)
+description: Form description (optional)
+path: /Forms/Business Surveys (optional)
 questions:
-  - title: 質問1
+  - title: Question 1
     type: short
 ```
 
 - `title`:
-  - 必須
-  - フォームタイトル
-  - 検索キーとして使用
+  - Required
+  - Form title
+  - Used as the search key
 - `documentTitle`:
-  - 任意
-  - 新規作成時のみ反映
-  - 更新時は変更されない
+  - Optional
+  - Applied only when creating a new form
+  - Not changed during updates
 - `description`:
-  - 任意
-  - フォーム説明
+  - Optional
+  - Form description
 - `path`:
-  - 任意
-  - Google Drive 上の配置先フォルダパス
-  - 省略時は Drive ルート
+  - Optional
+  - Destination folder path on Google Drive
+  - Defaults to the Drive root when omitted
 - `questions`:
-  - 任意（省略時は質問なし）
-  - 質問オブジェクトの配列
+  - Optional (no questions when omitted)
+  - Array of question objects
 
-## 質問オブジェクト
+## Question Objects
 
-各質問は以下の形式です。
+Each question uses the following format.
 
 ```yaml
-- title: 質問文
+- title: Question text
   type: short | paragraph | radio | checkbox | dropdown
-  required: true | false   # 任意（省略時 false）
-  description: 補足説明      # 任意
-  options:                 # radio/checkbox/dropdown で必須
-    - 選択肢A
-    - 選択肢B
-  shuffle: true | false    # radio/checkbox のみ有効
+  required: true | false   # Optional (default: false)
+  description: Help text    # Optional
+  options:                  # Required for radio/checkbox/dropdown
+    - Option A
+    - Option B
+  shuffle: true | false     # Only valid for radio/checkbox
 ```
 
-### type ごとの要件
+### Requirements by Type
 
 - `short`
-  - 1行テキスト
-  - `options` は不要
+  - Single-line text
+  - Does not use `options`
 - `paragraph`
-  - 複数行テキスト
-  - `options` は不要
+  - Multi-line text
+  - Does not use `options`
 - `radio`
-  - ラジオボタン
-  - `options` 必須
-  - `shuffle` 任意
+  - Radio buttons
+  - Requires `options`
+  - `shuffle` is optional
 - `checkbox`
-  - チェックボックス
-  - `options` 必須
-  - `shuffle` 任意
+  - Checkboxes
+  - Requires `options`
+  - `shuffle` is optional
 - `dropdown`
-  - ドロップダウン
-  - `options` 必須
-  - `shuffle` は無視される
+  - Dropdown
+  - Requires `options`
+  - `shuffle` is ignored
 
-## 更新時の挙動
+## Update Behavior
 
-既存フォームが見つかった場合は次を実行します。
+When an existing form is found, the script performs the following steps.
 
-1. タイトルと説明を更新
-2. 既存の質問を全削除
-3. YAML の `questions` で再作成
-4. `path` 指定があればフォームをそのフォルダに移動
+1. Updates the title and description
+2. Deletes all existing questions
+3. Recreates questions from YAML `questions`
+4. Moves the form to the specified folder when `path` is set
 
-## フォーム特定ルール
+## Form Matching Rules
 
-- 検索条件: `path` 配下で `title` が一致
-- 0 件: 新規作成
-- 1 件: 更新
-- 2 件以上: 曖昧エラー
+- Search condition: matching `title` under `path`
+- 0 matches: create a new form
+- 1 match: update the existing form
+- 2 or more matches: fail with an ambiguity error
 
-## エラーになりやすいケース
+## Common Error Cases
 
-- `title` がない
-- `type` が未対応（`short/paragraph/radio/checkbox/dropdown` 以外）
-- `radio/checkbox/dropdown` で `options` がない
-- 同じ `path` に同名フォームが複数ある
+- Missing `title`
+- Unsupported `type` (anything other than `short/paragraph/radio/checkbox/dropdown`)
+- Missing `options` for `radio/checkbox/dropdown`
+- Multiple forms with the same name under the same `path`
 
-## 注意事項
+## Notes
 
-- フォルダパス内に同名フォルダが複数ある場合は曖昧エラー
+- If multiple folders with the same name exist in a folder path, the script fails with an ambiguity error.
 
-## 完全サンプル
+## Complete Example
 
 ```yaml
-title: アンケート
-documentTitle: 2026Q2 業務改善アンケート
-description: 今後の業務改善の参考にするためのアンケートです
-path: /Forms/業務アンケート
+title: Survey
+documentTitle: 2026Q2 Business Improvement Survey
+description: A survey to help guide future business improvements
+path: /Forms/Business Surveys
 
 questions:
-  - title: 年齢を教えてください
+  - title: What is your age range?
     type: radio
     required: true
     options:
-      - 20歳未満
-      - 20-30歳
-      - 31-40歳
-      - 41-50歳
-      - 51歳以上
+      - Under 20
+      - 20-30
+      - 31-40
+      - 41-50
+      - 51 or older
     shuffle: true
 
-  - title: 業務で使用しているツールは何ですか？（複数選択可）
+  - title: Which tools do you use for work? (Select all that apply)
     type: checkbox
     required: true
     options:
@@ -130,17 +132,17 @@ questions:
       - Google Sheets
       - Slack
       - Microsoft Teams
-      - その他
+      - Other
 
-  - title: 最もよく使うツールはどれですか？
+  - title: Which tool do you use most often?
     type: dropdown
     options:
       - Excel
       - Google Sheets
       - Slack
 
-  - title: ご意見があればご記入ください
+  - title: Please share any additional comments
     type: paragraph
     required: false
-    description: 自由記述で入力してください
+    description: Enter free-form text
 ```

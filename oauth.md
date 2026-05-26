@@ -1,34 +1,36 @@
-# 認証情報 OAuth Client ID の取得
+# Getting OAuth Client ID Credentials
 
-1. Google Cloud プロジェクト作成
-   - Google Cloud Console を開く
-   - プロジェクト選択
-     - 「新しいプロジェクト」
-     - 任意の名前 (例: google-forms-cli)
+[English](oauth.md) | [日本語](oauth-ja.md)
 
-2. Google Forms API と Google Drive API を有効化
-   - API とサービス > ライブラリ
-   - Google Forms API と Google Drive API を有効にする
+1. Create a Google Cloud project
+   - Open Google Cloud Console
+   - Open the project selector
+     - Click "New Project"
+     - Enter any name (example: google-forms-cli)
 
-3. OAuth 同意画面設定
-   - API とサービス > OAuth 同意画面
-   - ブランディング > 開始
-   - 入力例:
-     - アプリ名: Form Sync Toolkit
-     - ユーザサポートメール: 自分の Gmail
-     - 対象: 外部
-     - 連絡先情報: 自分の Gmail
+2. Enable the Google Forms API and Google Drive API
+   - Go to APIs & Services > Library
+   - Enable Google Forms API and Google Drive API
 
-4. Test users を追加
-   - API とサービス > OAuth 同意画面
-   - ブランディング > 対象
-   - Test users > Add users
-   - 自分の Gmail を追加
+3. Configure the OAuth consent screen
+   - Go to APIs & Services > OAuth consent screen
+   - Open Branding > Get started
+   - Example values:
+     - App name: Form Sync Toolkit
+     - User support email: your Gmail address
+     - Audience: External
+     - Contact information: your Gmail address
 
-5. OAuth Client ID 作成
-   - API とサービス > 認証情報
-   - 認証情報を作成 > OAuth Client ID
-   - 入力例:
-     - クライアントの種類: デスクトップアプリ
-     - 名前: Form Sync Toolkit
-   - JSON をダウンロードして保存する
+4. Add test users
+   - Go to APIs & Services > OAuth consent screen
+   - Open Branding > Audience
+   - Open Test users > Add users
+   - Add your Gmail address
+
+5. Create an OAuth Client ID
+   - Go to APIs & Services > Credentials
+   - Open Create credentials > OAuth Client ID
+   - Example values:
+     - Application type: Desktop app
+     - Name: Form Sync Toolkit
+   - Download and save the JSON file
