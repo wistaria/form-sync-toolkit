@@ -9,39 +9,36 @@
 [![Author](https://img.shields.io/badge/author-Synge%20Todo-blue)](https://github.com/wistaria)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-YAML から Google フォームを作成・更新、一覧表示、YAML 書き出し、差分確認する CLI toolkit です。
+YAML から Google フォームを作成・更新し、一覧表示、YAML への書き出し、差分確認もできる CLI ツールキットです。
 
 ## 機能
 
 - YAML 定義から Google フォームを作成または更新
-- 既存の Google フォームを YAML として書き出し
-- Google フォームと YAML 定義を比較し、unified diff を表示
+- 既存の Google フォームを YAML として書き出す
+- Google フォームと YAML 定義を比較し、unified diff 形式で表示
 - Google Drive 上の Google フォームをフルパス付きで一覧表示
 - YAML の `path` に従って作成したフォームを Drive フォルダへ移動
 
 ## 要件
 
 - Python 3.10+
-- Google OAuth client credentials
-- 初回実行時に Python runtime 依存関係をインストールするためのネットワーク接続
+- Google OAuth クライアント認証情報
+- 初回実行時に Python の実行時依存関係をインストールするためのネットワーク接続
 
 ## セットアップ
 
-スクリプトは初回実行時にシステムの一時ディレクトリへ仮想環境を作成し、`requirements.txt` から実行時依存関係を自動インストールします。macOS では `/private/tmp/$UID/form-sync-toolkit` が使われます。
+スクリプトは初回実行時にシステムの一時ディレクトリへ仮想環境を作成し、`requirements.txt` から実行時依存関係を自動でインストールします。macOS では `/private/tmp/$UID/form-sync-toolkit` が使われます。
 
-OAuth client credentials の取得手順は [oauth-ja.md](oauth-ja.md) を参照してください。取得した credentials を環境変数に設定します。
+OAuth クライアント認証情報の取得手順は [oauth-ja.md](oauth-ja.md) を参照してください。初回の認証付きコマンド実行時に、ダウンロードした OAuth クライアント認証情報 JSON のパスを CLI で入力すると、`~/.config/form-sync-toolkit/credentials.json` にパーミッション `600` で保存されます。
 
-```bash
-export GOOGLE_CREDENTIALS_JSON='{"installed":{"client_id":"...","client_secret":"...","redirect_uris":["http://localhost"]}}'
-```
-
-credentials や scope を変更した場合は、`token.json` を削除してから再実行します。
+認証情報やスコープを変更した場合は、保存済みの認証情報と `token.json` を削除してから再実行します。
 
 ```bash
+rm -f ~/.config/form-sync-toolkit/credentials.json
 rm -f token.json
 ```
 
-初回認証時はブラウザが起動します。Google アカウントを選択してアクセスを許可し、自分で作成した OAuth app の未確認アプリ警告は続行してください。
+初回認証時はブラウザが起動します。Google アカウントを選択してアクセスを許可し、自分で作成した OAuth アプリの未確認アプリ警告では、そのまま続行してください。
 
 ## 使い方
 
@@ -88,20 +85,21 @@ YAML 形式の詳細は [yaml-ja.md](yaml-ja.md) を参照してください。
   - Form ID から Google フォームを読み込み、正規化した YAML を出力
 - `check_form.py`
   - 正規化した YAML と実際の Google フォームを比較
-  - title、description、path、質問種別、選択肢、必須設定を確認
+  - `title`、`description`、`path`、質問種別、選択肢、必須設定を確認
 - `list_form.py`
-  - フォーム名、ID、日時、URL、Drive 上のフルパスを表示
+  - フォーム名、ID、作成・更新日時、URL、Drive 上のフルパスを表示
 
 ## メモ
 
-- `requirements.txt` にはスクリプトが自動インストールする runtime 依存関係を置きます。
+- `requirements.txt` にはスクリプトが自動インストールする実行時依存関係を置きます。
 - `requirements-dev.txt` には `pytest` や `ruff` などの開発用ツールを置きます。
 - `FORM_SYNC_TOOLKIT_NO_AUTO_VENV=1` を設定すると、自動仮想環境セットアップをスキップできます。
-- OAuth token は実行時のカレントディレクトリに `token.json` として保存されます。
+- OAuth クライアント認証情報は `~/.config/form-sync-toolkit/credentials.json` にパーミッション `600` で保存されます。
+- OAuth トークンは実行時のカレントディレクトリに `token.json` として保存されます。
 
 ## 開発
 
-ローカル開発では、自分で仮想環境を作成して runtime と development の依存関係をインストールします。
+ローカル開発では、自分で仮想環境を作成して、実行時依存関係と開発用依存関係の両方をインストールします。
 
 ```bash
 python3 -m venv .venv

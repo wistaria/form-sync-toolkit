@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -10,11 +11,14 @@ import venv
 
 
 BOOTSTRAP_SKIP_ENV = "FORM_SYNC_TOOLKIT_NO_AUTO_VENV"
+MIN_PYTHON = (3, 10)
 PROJECT_VENV_NAME = "form-sync-toolkit"
 
 
 def ensure_project_venv() -> None:
     """Create/use the temp virtual environment before third-party imports."""
+    _require_supported_python()
+
     if os.getenv(BOOTSTRAP_SKIP_ENV):
         return
 
@@ -22,6 +26,8 @@ def ensure_project_venv() -> None:
     venv_dir = _default_venv_dir()
     venv_python = _venv_python(venv_dir)
     requirements = project_root / "requirements.txt"
+
+    _remove_venv_if_unsupported(venv_dir)
 
     if not venv_python.exists():
         print(f"Creating virtual environment: {venv_dir}", file=sys.stderr)
@@ -49,6 +55,61 @@ def ensure_project_venv() -> None:
 
     print("Restarting inside virtual environment...", file=sys.stderr)
     os.execv(str(venv_python), [str(venv_python), *sys.argv])
+
+
+def _require_supported_python(version_info=None) -> None:
+    if version_info is None:
+        version_info = sys.version_info
+
+    if tuple(version_info[:2]) >= MIN_PYTHON:
+        return
+
+    print(
+        "Error: Form Sync Toolkit requires Python "
+        f"{_format_python_version(MIN_PYTHON)}+, but this is "
+        f"Python {_format_python_version(version_info)}. "
+        "Install Python 3.10 or newer, then run the command with that Python.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+
+def _remove_venv_if_unsupported(venv_dir: Path) -> None:
+    version = _venv_python_version(venv_dir)
+    if version is None or tuple(version[:2]) >= MIN_PYTHON:
+        return
+
+    print(
+        "Removing virtual environment created with Python "
+        f"{_format_python_version(version)}: {venv_dir}",
+        file=sys.stderr,
+    )
+    shutil.rmtree(venv_dir)
+
+
+def _venv_python_version(venv_dir: Path) -> tuple[int, ...] | None:
+    pyvenv_cfg = venv_dir / "pyvenv.cfg"
+    try:
+        lines = pyvenv_cfg.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+
+    for line in lines:
+        key, sep, value = line.partition("=")
+        if sep and key.strip() == "version":
+            return _parse_python_version(value.strip())
+    return None
+
+
+def _parse_python_version(value: str) -> tuple[int, ...] | None:
+    try:
+        return tuple(int(part) for part in value.split("."))
+    except ValueError:
+        return None
+
+
+def _format_python_version(version_info) -> str:
+    return ".".join(str(part) for part in tuple(version_info[:3]))
 
 
 def _venv_python(venv_dir: Path) -> Path:

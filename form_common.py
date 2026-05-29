@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import json
-import os
+import stat
 import sys
+from builtins import input
 from pathlib import Path
 
 import yaml
@@ -28,6 +29,37 @@ class PrettyYamlDumper(yaml.SafeDumper):
         return super().increase_indent(flow, False)
 
 
+CONFIG_DIR = Path.home() / ".config" / "form-sync-toolkit"
+CREDENTIALS_PATH = CONFIG_DIR / "credentials.json"
+
+
+def load_client_config():
+    if CREDENTIALS_PATH.exists():
+        return json.loads(CREDENTIALS_PATH.read_text(encoding="utf-8"))
+
+    prompt = (
+        "OAuth client credentials JSON path not found.\n"
+        "Enter the path to the OAuth client credentials JSON file: "
+    )
+    credentials_source = Path(input(prompt).strip()).expanduser()
+
+    if not credentials_source.is_file():
+        raise FileNotFoundError(
+            f"OAuth client credentials JSON file not found: {credentials_source}"
+        )
+
+    client_config = json.loads(credentials_source.read_text(encoding="utf-8"))
+
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    CREDENTIALS_PATH.write_text(
+        json.dumps(client_config, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    CREDENTIALS_PATH.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+    return client_config
+
+
 def get_credentials(scopes):
     token_path = Path("token.json")
     creds = None
@@ -39,8 +71,7 @@ def get_credentials(scopes):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            credentials_json = os.environ["GOOGLE_CREDENTIALS_JSON"]
-            client_config = json.loads(credentials_json)
+            client_config = load_client_config()
             flow = InstalledAppFlow.from_client_config(
                 client_config,
                 scopes,

@@ -29,15 +29,12 @@ A CLI toolkit for creating, updating, exporting, listing, and checking Google Fo
 
 The scripts create a virtual environment in the system temp directory and install runtime dependencies from `requirements.txt` automatically on first run. On macOS, the path is `/private/tmp/$UID/form-sync-toolkit`.
 
-Get OAuth client credentials by following [oauth.md](oauth.md), then set them as an environment variable:
+Get OAuth client credentials by following [oauth.md](oauth.md). On the first authenticated run, the CLI prompts for the path to the downloaded OAuth client credentials JSON file and saves it to `~/.config/form-sync-toolkit/credentials.json` with mode `600`.
+
+If you change credentials or scopes, remove both the saved credentials file and `token.json`, then run a command again:
 
 ```bash
-export GOOGLE_CREDENTIALS_JSON='{"installed":{"client_id":"...","client_secret":"...","redirect_uris":["http://localhost"]}}'
-```
-
-If you change credentials or scopes, remove `token.json` and run a command again:
-
-```bash
+rm -f ~/.config/form-sync-toolkit/credentials.json
 rm -f token.json
 ```
 
@@ -97,6 +94,7 @@ See [yaml.md](yaml.md) for the YAML format.
 - `requirements.txt` contains runtime dependencies installed by the scripts.
 - `requirements-dev.txt` contains development tools such as `pytest` and `ruff`.
 - Set `FORM_SYNC_TOOLKIT_NO_AUTO_VENV=1` to skip automatic virtual environment setup.
+- OAuth client credentials are stored in `~/.config/form-sync-toolkit/credentials.json` with mode `600`.
 - OAuth tokens are stored in `token.json` in the current working directory.
 
 ## Development
