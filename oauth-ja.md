@@ -33,5 +33,5 @@
    - 入力例:
      - クライアントの種類: デスクトップアプリ
      - 名前: Form Sync Toolkit
-   - JSON をダウンロードして保存する
-   - 初回の認証付き CLI 実行時に、その JSON ファイルのパスを入力する。toolkit が `~/.config/form-sync-toolkit/credentials.json` へ mode `600` でコピーして保存する
+   - JSON をダウンロードする
+   - 初回の認証付き CLI 実行時に、その JSON の中身を貼り付ける。toolkit が `~/.config/form-sync-toolkit/credentials.json` へ mode `600` で保存する

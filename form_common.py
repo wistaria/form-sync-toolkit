@@ -31,24 +31,14 @@ class PrettyYamlDumper(yaml.SafeDumper):
 
 CONFIG_DIR = Path.home() / ".config" / "form-sync-toolkit"
 CREDENTIALS_PATH = CONFIG_DIR / "credentials.json"
+TOKEN_PATH = CONFIG_DIR / "token.json"
 
 
 def load_client_config():
     if CREDENTIALS_PATH.exists():
         return json.loads(CREDENTIALS_PATH.read_text(encoding="utf-8"))
 
-    prompt = (
-        "OAuth client credentials JSON path not found.\n"
-        "Enter the path to the OAuth client credentials JSON file: "
-    )
-    credentials_source = Path(input(prompt).strip()).expanduser()
-
-    if not credentials_source.is_file():
-        raise FileNotFoundError(
-            f"OAuth client credentials JSON file not found: {credentials_source}"
-        )
-
-    client_config = json.loads(credentials_source.read_text(encoding="utf-8"))
+    client_config = prompt_client_config()
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CREDENTIALS_PATH.write_text(
@@ -60,12 +50,62 @@ def load_client_config():
     return client_config
 
 
+def prompt_client_config():
+    prompt = (
+        "OAuth client credentials JSON not found.\n"
+        "Paste the OAuth client credentials JSON: "
+    )
+    lines = []
+
+    while True:
+        try:
+            line = input(prompt if not lines else "")
+        except EOFError as exc:
+            raise ValueError("OAuth client credentials JSON input ended early.") from exc
+
+        lines.append(line)
+        raw_json = "\n".join(lines).strip()
+        if not raw_json or not _looks_like_complete_json(raw_json):
+            continue
+
+        try:
+            return json.loads(raw_json)
+        except json.JSONDecodeError as exc:
+            raise ValueError("Invalid OAuth client credentials JSON.") from exc
+
+
+def _looks_like_complete_json(raw_json):
+    depth = 0
+    in_string = False
+    escape = False
+
+    for char in raw_json:
+        if escape:
+            escape = False
+            continue
+        if char == "\\" and in_string:
+            escape = True
+            continue
+        if char == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if char in "{[":
+            depth += 1
+        elif char in "}]":
+            depth -= 1
+            if depth < 0:
+                return True
+
+    return depth == 0 and not in_string
+
+
 def get_credentials(scopes):
-    token_path = Path("token.json")
     creds = None
 
-    if token_path.exists():
-        creds = Credentials.from_authorized_user_file(token_path, scopes)
+    if TOKEN_PATH.exists():
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, scopes)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -78,7 +118,9 @@ def get_credentials(scopes):
             )
             creds = flow.run_local_server(port=0)
 
-        token_path.write_text(creds.to_json())
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
+        TOKEN_PATH.chmod(stat.S_IRUSR | stat.S_IWUSR)
 
     return creds
 

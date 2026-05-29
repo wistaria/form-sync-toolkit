@@ -32,7 +32,7 @@ class _FakeFlow:
 def test_get_credentials_prompts_and_persists_client_config(tmp_path, monkeypatch):
     config_dir = tmp_path / ".config" / "form-sync-toolkit"
     credentials_path = config_dir / "credentials.json"
-    source_path = tmp_path / "downloaded-credentials.json"
+    token_path = config_dir / "token.json"
     source_config = {
         "installed": {
             "client_id": "client-id",
@@ -40,7 +40,7 @@ def test_get_credentials_prompts_and_persists_client_config(tmp_path, monkeypatc
             "redirect_uris": ["http://localhost"],
         }
     }
-    source_path.write_text(json.dumps(source_config), encoding="utf-8")
+    source_json_lines = iter(json.dumps(source_config, indent=2).splitlines())
 
     fake_creds = _FakeCreds(valid=True)
     flow = _FakeFlow(fake_creds)
@@ -48,7 +48,8 @@ def test_get_credentials_prompts_and_persists_client_config(tmp_path, monkeypatc
 
     monkeypatch.setattr(form_common, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(form_common, "CREDENTIALS_PATH", credentials_path)
-    monkeypatch.setattr(form_common, "input", lambda _prompt: str(source_path))
+    monkeypatch.setattr(form_common, "TOKEN_PATH", token_path)
+    monkeypatch.setattr(form_common, "input", lambda _prompt: next(source_json_lines))
     monkeypatch.setattr(form_common.Credentials, "from_authorized_user_file", lambda *_args: None)
     monkeypatch.setattr(
         form_common.InstalledAppFlow,
@@ -64,14 +65,17 @@ def test_get_credentials_prompts_and_persists_client_config(tmp_path, monkeypatc
     assert flow.run_calls == [0]
     assert json.loads(credentials_path.read_text(encoding="utf-8")) == source_config
     assert stat.S_IMODE(credentials_path.stat().st_mode) == 0o600
-    assert json.loads((tmp_path / "token.json").read_text(encoding="utf-8")) == {
+    assert json.loads(token_path.read_text(encoding="utf-8")) == {
         "token": "token-value"
     }
+    assert not (tmp_path / "token.json").exists()
+    assert stat.S_IMODE(token_path.stat().st_mode) == 0o600
 
 
 def test_get_credentials_reuses_saved_client_config(tmp_path, monkeypatch):
     config_dir = tmp_path / ".config" / "form-sync-toolkit"
     credentials_path = config_dir / "credentials.json"
+    token_path = config_dir / "token.json"
     saved_config = {
         "installed": {
             "client_id": "saved-client-id",
@@ -88,6 +92,7 @@ def test_get_credentials_reuses_saved_client_config(tmp_path, monkeypatch):
 
     monkeypatch.setattr(form_common, "CONFIG_DIR", config_dir)
     monkeypatch.setattr(form_common, "CREDENTIALS_PATH", credentials_path)
+    monkeypatch.setattr(form_common, "TOKEN_PATH", token_path)
     monkeypatch.setattr(
         form_common,
         "input",

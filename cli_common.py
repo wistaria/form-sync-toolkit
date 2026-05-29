@@ -53,7 +53,6 @@ def ensure_project_venv() -> None:
     if _running_in_venv(venv_dir):
         return
 
-    print("Restarting inside virtual environment...", file=sys.stderr)
     os.execv(str(venv_python), [str(venv_python), *sys.argv])
 
 

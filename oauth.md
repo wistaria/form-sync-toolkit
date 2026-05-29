@@ -33,5 +33,5 @@
    - Example values:
      - Application type: Desktop app
      - Name: Form Sync Toolkit
-   - Download and save the JSON file
-   - On the first authenticated CLI run, enter that file path when prompted. The toolkit copies it to `~/.config/form-sync-toolkit/credentials.json` with mode `600`.
+   - Download the JSON file
+   - On the first authenticated CLI run, paste the JSON contents when prompted. The toolkit saves it to `~/.config/form-sync-toolkit/credentials.json` with mode `600`.
